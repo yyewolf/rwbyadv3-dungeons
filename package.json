@@ -1,0 +1,30 @@
+{
+  "name": "dungeons",
+  "version": "0.1.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "prepublishOnly": "tsc",
+    "start": "parcel src/index.html --port 80",
+    "build": "parcel build src/index.html --public-url /",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "devDependencies": {
+    "images": "^3.2.3",
+    "parcel": "^1.12.4",
+    "parcel-bundler": "^1.12.3",
+    "pixi.js": "^6.0.2",
+    "typescript": "^4.1.3"
+  },
+  "peerDependencies": {
+    "pixi.js": "*"
+  },
+  "dependencies": {
+    "assets": "^3.0.1"
+  }
+}
