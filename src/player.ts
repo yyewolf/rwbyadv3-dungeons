@@ -11,22 +11,18 @@ export var Player = function (x, y, map) {
   this.map = map;
   this.powerHorizontal = 0;
   this.powerVertical = 0;
-  // this.gun = new PIXI.Sprite(Resources.get('gun'));
-  // UI.getLayer('gun').addChild(this.gun);
-  // this.gun.position.y = Config.screenHeight - 140;
-  // this.gun.position.x = (Config.screenWidth / 2);
-  // this.gunPos = Config.screenHeight - 140;
-  // this.gun.scale = { x: 1.5, y: 1.5 };
-  // this.gun.animationSpeed = 0.28;
-  // this.gun.loop = false;
-  // this.gunDy = 0;
 
-  // this.gun.onComplete = function () {
-  //   setTimeout(function () {
-  //     this.gunFiring = false;
-  //   }.bind(this), 200);
-  //   this.gun.gotoAndStop(0);
-  // }.bind(this);
+  this.offset = {
+    x: 0,
+    y: 0,
+  }
+
+  this.getMapPosition = function () {
+    return {
+      x: this.position.x - this.offset.x,
+      y: this.position.y - this.offset.y,
+    }
+  }
 }
 
 Player.prototype = new Camera(0, 0);
@@ -36,61 +32,49 @@ Player.prototype.update = function (frameTime) {
   this.moveSpeed = frameTime * 3;
   this.rotSpeed = frameTime * 1.5;
   this.moveGun = false;
-  // if (Key.isDown(Key.UP)) {
-  //   this.moveGun = true;
-  //   if (this.map.wallGrid[Math.floor(this.position.x + this.direction.x * this.moveSpeed * 4)]
-  //   [Math.floor(this.position.y)] == false) {
-  //     this.position.x += this.direction.x * this.moveSpeed;
-  //   }
-  //   if (this.map.wallGrid[Math.floor(this.position.x)]
-  //   [Math.floor(this.position.y + this.direction.y * this.moveSpeed * 4)] == false) {
-  //     this.position.y += this.direction.y * this.moveSpeed;
-  //   }
-  // }
 
-  // if key is up rotate up
   if (Key.isDown(Key.UP)) {
     this.moveGun = true;
-    if (this.map.wallGrid[Math.floor(this.position.x + this.direction.x * this.moveSpeed * 4)]
-    [Math.floor(this.position.y)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x + this.direction.x * this.moveSpeed * 4)]
+    [Math.floor(this.getMapPosition().y)] == false) {
       this.position.x += this.direction.x * this.moveSpeed;
     }
-    if (this.map.wallGrid[Math.floor(this.position.x)]
-    [Math.floor(this.position.y + this.direction.y * this.moveSpeed * 4)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x)]
+    [Math.floor(this.getMapPosition().y + this.direction.y * this.moveSpeed * 4)] == false) {
       this.position.y += this.direction.y * this.moveSpeed;
     }
   } else if (this.powerVertical > 0) {
     this.moveGun = true;
     let moveSpeed = this.moveSpeed * this.powerVertical;
-    if (this.map.wallGrid[Math.floor(this.position.x + this.direction.x * moveSpeed * 4)]
-    [Math.floor(this.position.y)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x + this.direction.x * moveSpeed * 4)]
+    [Math.floor(this.getMapPosition().y)] == false) {
       this.position.x += this.direction.x * moveSpeed;
     }
-    if (this.map.wallGrid[Math.floor(this.position.x)]
-    [Math.floor(this.position.y + this.direction.y * moveSpeed * 4)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x)]
+    [Math.floor(this.getMapPosition().y + this.direction.y * moveSpeed * 4)] == false) {
       this.position.y += this.direction.y * moveSpeed;
     }
   }
 
   if (Key.isDown(Key.DOWN)) {
     this.moveGun = true;
-    if (this.map.wallGrid[Math.floor(this.position.x - this.direction.x * this.moveSpeed * 4)]
-    [Math.floor(this.position.y)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x - this.direction.x * this.moveSpeed * 4)]
+    [Math.floor(this.getMapPosition().y)] == false) {
       this.position.x -= this.direction.x * this.moveSpeed;
     }
-    if (this.map.wallGrid[Math.floor(this.position.x)]
-    [Math.floor(this.position.y - this.direction.y * this.moveSpeed * 4)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x)]
+    [Math.floor(this.getMapPosition().y - this.direction.y * this.moveSpeed * 4)] == false) {
       this.position.y -= this.direction.y * this.moveSpeed;
     }
   } else if (this.powerVertical < 0) {
     this.moveGun = true;
     let moveSpeed = -this.moveSpeed * this.powerVertical;
-    if (this.map.wallGrid[Math.floor(this.position.x - this.direction.x * moveSpeed * 4)]
-    [Math.floor(this.position.y)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x - this.direction.x * moveSpeed * 4)]
+    [Math.floor(this.getMapPosition().y)] == false) {
       this.position.x -= this.direction.x * moveSpeed;
     }
-    if (this.map.wallGrid[Math.floor(this.position.x)]
-    [Math.floor(this.position.y - this.direction.y * moveSpeed * 4)] == false) {
+    if (this.map.wallGrid[Math.floor(this.getMapPosition().x)]
+    [Math.floor(this.getMapPosition().y - this.direction.y * moveSpeed * 4)] == false) {
       this.position.y -= this.direction.y * moveSpeed;
     }
   }
@@ -137,7 +121,7 @@ Player.prototype.update = function (frameTime) {
   let spriteRadius = 0.3;
 
   this.map.sprites.forEach(sprite => {
-    if (Math.abs(this.position.x - sprite.x) < spriteRadius && Math.abs(this.position.y - sprite.y) < spriteRadius) {
+    if (Math.abs(this.getMapPosition().x - sprite.x) < spriteRadius && Math.abs(this.getMapPosition().y - sprite.y) < spriteRadius) {
       this.map.sprites.splice(this.map.sprites.indexOf(sprite), 1);
     }
   });

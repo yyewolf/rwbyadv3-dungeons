@@ -11,8 +11,6 @@ import { update } from "./renderer";
 import { Player } from "./player";
 import { Joystick } from "../lib/joystick.ts";
 
-console.log('game.ts');
-
 PIXI.Loader.shared
   .add('redbrick', require("../assets/redbrick.png"))
   .add('pistol', require("../assets/pistol.png"))
@@ -27,11 +25,12 @@ PIXI.Loader.shared
   .add('barrel', require("../assets/barrel.png"))
   .add('greenlight', require("../assets/greenlight.png"))
   .add('pillar', require("../assets/pillar.png"))
+  .add('transparent', require("../assets/transparent.png"))
   .add('joystick', require("../assets/joystick.png"))
   .add('joystick-handle', require("../assets/joystick-handle.png"))
   .load(start);
 
-function start() {
+async function start() {
   const app = new PIXI.Application({
     view: document.getElementById('canvas') as HTMLCanvasElement,
     autoDensity: true,
@@ -58,8 +57,11 @@ function start() {
   var sprite, walls = UI.getLayer('walls');
   // Create wall 'slice' sprites (ie rays)
 
-  var map = new Map();
-  var player = new Player(20.5, 11.5, map);
+  let resp = await fetch('map')
+  let wallGrid = await resp.json()
+
+  var map = new Map(wallGrid);
+  var player = new Player(3, 3, map);
 
   requestAnimationFrame(animate);
   setInterval(function () {

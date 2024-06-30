@@ -6,7 +6,7 @@ import { Config } from "./config";
 export var Resources = {
     pool: {},
     init: function () {
-        var texture: any = [[], [], [], [], [], [], [], []];
+        var texture: any = [[], [], [], [], [], [], [], [], [], [], [], [], []];
         var brick = PIXI.BaseTexture.from('redbrick'),
             wood = PIXI.BaseTexture.from('wood'),
             purpstone = PIXI.BaseTexture.from('purplestone'),
@@ -14,9 +14,11 @@ export var Resources = {
             grey = PIXI.BaseTexture.from('greystone'),
             blue = PIXI.BaseTexture.from('bluestone'),
             eagle = PIXI.BaseTexture.from('eagle'),
-            color = PIXI.BaseTexture.from('colorstone');
+            color = PIXI.BaseTexture.from('colorstone'),
+
+            transparent = PIXI.BaseTexture.from('transparent');
         for (var x = 0; x < Config.texWidth; x++) {
-            texture[0][x] = new PIXI.Texture(eagle, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
+            texture[0][x] = new PIXI.Texture(wood, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
             texture[1][x] = new PIXI.Texture(brick, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
             texture[2][x] = new PIXI.Texture(purpstone, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
             texture[3][x] = new PIXI.Texture(grey, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
@@ -24,6 +26,8 @@ export var Resources = {
             texture[5][x] = new PIXI.Texture(mossy, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
             texture[6][x] = new PIXI.Texture(wood, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
             texture[7][x] = new PIXI.Texture(color, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
+
+            texture[10][x] = new PIXI.Texture(transparent, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
         }
         this.store('texture', texture);
         var gunTexture: any = [];
