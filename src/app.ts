@@ -38,11 +38,6 @@ function initialize() {
   });
   app.stage.addChild(rightJoystick);
 
-  leftText.position.set(0, 0);
-  rightText.position.set(0, 50);
-  app.stage.addChild(leftText);
-  app.stage.addChild(rightText);
-
   const resize = () => {
     leftJoystick.position.set(leftJoystick.width, window.innerHeight - leftJoystick.height);
     rightJoystick.position.set(window.innerWidth - rightJoystick.width, window.innerHeight - rightJoystick.height);

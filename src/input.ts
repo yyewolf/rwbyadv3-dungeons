@@ -2,11 +2,12 @@
 export const Key = {
   _pressed: {},
 
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  SPACE: 32,
+  W: 87,
+  S: 83,
+  D: 68,
+  A: 65,
+  Q: 81,
+  Z: 90,
 
   goDir: function (dir) {
     switch (dir) {
@@ -38,13 +39,6 @@ export const Key = {
 
   onKeydown: function (event) {
     this._pressed[event.keyCode] = true;
-    if (event.keyCode == this.LEFT ||
-      event.keyCode == this.UP ||
-      event.keyCode == this.RIGHT ||
-      event.keyCode == this.DOWN ||
-      event.keyCode == this.SPACE) {
-      event.preventDefault();
-    }
   },
 
   onKeyup: function (event) {

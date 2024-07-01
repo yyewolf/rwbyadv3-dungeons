@@ -37,15 +37,11 @@ export var Resources = {
         }
         this.store('gun', gunTexture);
 
-        var sprites: any = [[], [], []];
-        var barrel = PIXI.BaseTexture.from('barrel'),
-            greenlight = PIXI.BaseTexture.from('greenlight'),
-            pillar = PIXI.BaseTexture.from('pillar');
-        for (var x = 0; x < Config.texWidth; x++) {
-            sprites[0][x] = new PIXI.Texture(barrel, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
-            sprites[1][x] = new PIXI.Texture(greenlight, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
-            sprites[2][x] = new PIXI.Texture(pillar, new PIXI.Rectangle(x, 0, 1, Config.texHeight));
-        }
+        var sprites: any = [
+            PIXI.BaseTexture.from('barrel'),
+            PIXI.BaseTexture.from('greenlight'),
+            PIXI.BaseTexture.from('pillar'),
+        ];
         this.store('sprites', sprites);
     },
     store: function (name, resource) {

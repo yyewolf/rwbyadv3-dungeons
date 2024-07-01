@@ -91,6 +91,10 @@ export function drawWalls(camera, map) {
     drawStart = -lineHeight / 2 + Config.screenHeight / 2;
     drawEnd = lineHeight / 2 + Config.screenHeight / 2;
 
+    // allow for camera pitch
+    drawStart += camera.position.pitch;
+    drawEnd += camera.position.pitch;
+
     if (side == 1) {
       wallX = rayPosX + ((mapY - rayPosY + (1 - stepY) / 2) / rayDirY) * rayDirX;
     } else {
@@ -165,77 +169,42 @@ export function drawSprites(camera, map) {
   // Process each sprite
   map.sprites.forEach(sprite => {
     const spriteTexture = Resources.get('sprites')[0];
-    const spriteX = sprite.x
-    const spriteY = sprite.y
 
     // Check if the sprite is in the player's field of view
-    const transformX = spriteX - camera.position.x
-    const transformY = spriteY - camera.position.y
+    const spriteX = sprite.x - camera.position.x
+    const spriteY = sprite.y - camera.position.y
 
     const invDet = 1.0 / (camera.plane.x * camera.direction.y - camera.direction.x * camera.plane.y)
-    const transformXScreen = invDet * (camera.direction.y * transformX - camera.direction.x * transformY)
-    const transformYScreen = invDet * (-camera.plane.y * transformX + camera.plane.x * transformY)
+    const transformX = invDet * (camera.direction.y * spriteX - camera.direction.x * spriteY)
+    const transformY = invDet * (-camera.plane.y * spriteX + camera.plane.x * spriteY)
 
-    // ignore if it is behind the player
-    if (transformYScreen <= 0) {
-      return;
-    }
+    const spriteScreenX = Math.floor((Config.screenWidth / 2) * (1 + transformX / transformY))
 
-    const spriteScreenX = Math.floor((Config.screenWidth / 2) * (1 + transformXScreen / transformYScreen))
-    const spriteHeight = Math.abs(Math.floor(Config.screenHeight / transformYScreen)) * 0.5
-    const drawStartY = -spriteHeight / 2 + Config.screenHeight / 2
-    const drawEndY = spriteHeight / 2 + Config.screenHeight / 2
-    const spriteWidth = Math.abs(Math.floor(Config.screenHeight / transformYScreen)) * 0.5
-    const drawStartX = -spriteWidth / 2 + spriteScreenX
-    const drawEndX = spriteWidth / 2 + spriteScreenX
+    const uDiv = 1
+    const vDiv = 1
+    const vMove = 0.0
+    const vMoveScreen = Math.floor(vMove / transformY + camera.position.pitch); // + posZ / transformY;
 
-    // Check if we should draw it
-    if (drawStartX > Config.screenWidth || drawEndX < 0 || drawStartY > Config.screenHeight || drawEndY < 0) {
-      return;
-    }
-    if (drawStartX < 0 && drawEndX > Config.screenWidth) {
-      return;
-    }
-    if (drawStartY < 0 && drawEndY > Config.screenHeight) {
-      return;
-    }
+    const spriteHeight = Math.floor(Math.abs(Math.floor(Config.screenHeight / transformY)) / vDiv);
+    let drawStartY = Math.floor(-spriteHeight / 2 + Config.screenHeight / 2 + vMoveScreen);
+    let drawEndY = Math.floor(spriteHeight / 2 + Config.screenHeight / 2 + vMoveScreen);
 
-    // Check against zBuffer
+    const spriteWidth = Math.floor(Math.abs(Math.floor(Config.screenHeight / transformY)) / uDiv);
+    let drawStartX = Math.floor(-spriteWidth / 2 + spriteScreenX);
+    let drawEndX = Math.floor(spriteWidth / 2 + spriteScreenX);
+
     for (let stripe = drawStartX; stripe < drawEndX; stripe++) {
-      // Check if we're in bounds
-      if (stripe < 0 || stripe >= Config.screenWidth) {
-        continue;
+      let texX = Math.floor(Math.floor(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * Config.texWidth / spriteWidth) / 256)
+
+      if (transformY > 0 && stripe > 0 && stripe < Config.screenWidth && transformY < zBuffer[stripe]) {
+        const line = new PIXI.Sprite(new PIXI.Texture(spriteTexture, new PIXI.Rectangle(texX, 0, 1, Config.texHeight)))
+        line.position.x = stripe
+        line.position.y = drawStartY
+        line.width = 1
+        line.height = drawEndY - drawStartY
+        line.tint = 0xFFFFFF
+        spriteLayer.addChild(line)
       }
-
-      rayIdx = Math.floor(stripe);
-
-      // Check the dist from the wall
-      let perpWallDist = zBuffer[rayIdx];
-      let perpLineDist = transformYScreen;
-      if (perpLineDist > perpWallDist) {
-        continue;
-      }
-
-      // Calculate height of the sprite
-      let lineHeight = Math.abs(Math.floor(Config.screenHeight / perpLineDist)) * 0.5;
-
-      let drawStart = (-lineHeight / 2 + Config.screenHeight / 2);
-      let drawEnd = (lineHeight / 2 + Config.screenHeight / 2);
-
-      // offset drawStart and drawEnd to draw closer to the floor
-      drawStart += lineHeight / 2;
-      drawEnd += lineHeight / 2;
-
-      let texX = Math.floor((stripe - drawStartX) / spriteWidth * Config.texWidth);
-
-      // Draw this vertical line
-      let spriteLine = new PIXI.Sprite();
-      // Set texture
-      spriteLine.texture = spriteTexture[texX];
-      spriteLine.position.x = stripe;
-      spriteLine.position.y = drawStart;
-      spriteLine.height = drawEnd - drawStart;
-      spriteLayer.addChild(spriteLine);
     }
-  });
-} 
+  })
+}

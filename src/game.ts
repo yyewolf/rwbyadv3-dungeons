@@ -9,7 +9,7 @@ import { Config } from "./config";
 import { Map } from "./map";
 import { update } from "./renderer";
 import { Player } from "./player";
-import { Joystick } from "../lib/joystick.ts";
+import { Direction, Joystick } from "../lib/joystick.ts";
 
 PIXI.Loader.shared
   .add('redbrick', require("../assets/redbrick.png"))
@@ -28,6 +28,7 @@ PIXI.Loader.shared
   .add('transparent', require("../assets/transparent.png"))
   .add('joystick', require("../assets/joystick.png"))
   .add('joystick-handle', require("../assets/joystick-handle.png"))
+  .add('crosshair', require("../assets/crosshair.png"))
   .load(start);
 
 async function start() {
@@ -53,6 +54,7 @@ async function start() {
   UI.addLayer(app, 'walls');
   UI.addLayer(app, 'sprites');
   UI.addLayer(app, 'gun');
+  UI.addLayer(app, 'hud');
 
   var sprite, walls = UI.getLayer('walls');
   // Create wall 'slice' sprites (ie rays)
@@ -73,44 +75,36 @@ async function start() {
     inner: PIXI.Sprite.from('joystick-handle'),
     outerScale: { x: 0.5, y: 0.5 },
     innerScale: { x: 0.8, y: 0.8 },
-    direction: 'vertical',
     onChange: (data) => {
-      if (data.power <= 0.3) {
-        data.power = 0;
-      }
-      if (data.direction === 'bottom') {
-        data.power = -data.power;
-      }
-      player.powerVertical = data.power;
+      // convert to rad
+      let angle = data.angle * Math.PI / 180;
+      let powerX = data.power * Math.cos(angle);
+      let powerY = data.power * Math.sin(angle);
+
+      player.powerVertical = powerY;
+      player.powerHorizontal = powerX;
     },
     onStart: () => console.log('start'),
     onEnd: () => {
       player.powerVertical = 0;
+      player.powerHorizontal = 0;
     },
   });
   app.stage.addChild(leftJoystick);
 
-  const rightJoystick = new Joystick({
-    onChange: (data) => {
-      if (data.power <= 0.3) {
-        data.power = 0;
-      }
-      if (data.direction === 'right') {
-        data.power = -data.power;
-      }
-      player.powerHorizontal = data.power;
-    },
-    direction: 'horizontal',
-    onStart: () => console.log('start'),
-    onEnd: () => {
-      player.powerHorizontal = 0;
-    },
-  });
-  app.stage.addChild(rightJoystick);
+  // Add crosshair to HUD
+  const crosshair = PIXI.Sprite.from('crosshair');
+  crosshair.anchor.set(0.5);
+  crosshair.position.set(window.innerWidth / 2, window.innerHeight / 2);
+  crosshair.scale.set(0.02);
+  UI.getLayer('hud').addChild(crosshair);
+
 
   const resize = () => {
     leftJoystick.position.set(leftJoystick.width, window.innerHeight - leftJoystick.height);
-    rightJoystick.position.set(window.innerWidth - rightJoystick.width, window.innerHeight - rightJoystick.height);
+
+    // crosshair
+    crosshair.position.set(window.innerWidth / 2, window.innerHeight / 2);
 
     // Delete rays
     let newWalls = walls;
@@ -142,6 +136,44 @@ async function start() {
     resize();
     setTimeout(resize, 100)
   });
+
+  let handleCamera = (e) => {
+    // if finger is on joystick, don't move camera
+    if (leftJoystick.dragging && leftJoystick.pointerId === e.pointerId) {
+      console.log('joystick')
+      return;
+    }
+
+    // new pitch
+    player.position.pitch -= e.movementY * 3;
+
+    // new dir
+    player.oldDirX = player.direction.x;
+    player.direction.x = player.direction.x * Math.cos(-e.movementX * 0.01) - player.direction.y * Math.sin(-e.movementX * 0.01);
+    player.direction.y = player.oldDirX * Math.sin(-e.movementX * 0.01) + player.direction.y * Math.cos(-e.movementX * 0.01);
+
+    // new plane
+    player.oldPlaneX = player.plane.x;
+    player.plane.x = player.plane.x * Math.cos(-e.movementX * 0.01) - player.plane.y * Math.sin(-e.movementX * 0.01);
+    player.plane.y = player.oldPlaneX * Math.sin(-e.movementX * 0.01) + player.plane.y * Math.cos(-e.movementX * 0.01);
+  }
+  let canvas = document.getElementById('canvas');
+  canvas?.addEventListener('click', () => {
+    // canvas?.requestPointerLock()
+  });
+  canvas?.addEventListener('pointermove', handleCamera, false);
+  canvas?.addEventListener('pointerdown', (e) => {
+    // if near joystick, don't move camera set pointerId
+    let boxSize = leftJoystick.width + 50;
+    let joystickCenter = {
+      x: leftJoystick.position.x + leftJoystick.width / 2,
+      y: leftJoystick.position.y + leftJoystick.height / 2,
+    }
+    if (e.clientX > joystickCenter.x - boxSize && e.clientX < joystickCenter.x + boxSize && e.clientY > joystickCenter.y - boxSize && e.clientY < joystickCenter.y + boxSize) {
+      console.log(e)
+      leftJoystick.pointerId = e.pointerId;
+    }
+  }, false);
 
   app.start();
 }
