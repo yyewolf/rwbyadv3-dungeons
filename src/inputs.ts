@@ -8,12 +8,8 @@ export class Inputs {
     public Q = 81;
     public Z = 90;
 
-    stopMoving() {
-        delete this._pressed[this.W];
-        delete this._pressed[this.S];
-        delete this._pressed[this.A];
-        delete this._pressed[this.D];
-    }
+    static horizontalPower = 0;
+    static verticalPower = 0;
 
     isDown(keyCode: number) {
         return this._pressed[keyCode];
@@ -25,5 +21,19 @@ export class Inputs {
 
     onKeyup(event: KeyboardEvent) {
         delete this._pressed[event.keyCode];
+    }
+
+    onJoyStickChange(event: any) {
+        // Convert angle to radian
+        let angle = event.angle * Math.PI / 180;
+        let power = event.power;
+
+        Inputs.horizontalPower = Math.cos(angle) * power;
+        Inputs.verticalPower = Math.sin(angle) * power;
+    }
+
+    onJoyStickEnd() {
+        Inputs.horizontalPower = 0;
+        Inputs.verticalPower = 0;
     }
 };

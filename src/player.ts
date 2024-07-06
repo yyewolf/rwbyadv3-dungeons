@@ -1,45 +1,37 @@
 import { Camera, Color, Light, LightType, LightingEnvironment, Mesh3D, Quat, StandardMaterial } from "pixi3d/pixi7"
 import { Inputs } from "./inputs";
-import { Application, ObservablePoint } from "pixi.js";
-import { Map } from "./map";
+import { ObservablePoint } from "pixi.js";
+import { Game } from "./game";
 
 export class Player {
-    app: Application;
+    game: Game;
     camera: Camera;
-    inputsController: Inputs;
-    map: Map;
+    moveSpeed: number = 0.75;
+    mapPosition: { x: number, y: number, realX: number, realY: number } = { x: 0, y: 0, realX: 0, realY: 0 }
 
-    powerHorizontal: number = 0;
-    powerVertical: number = 0;
-
-    moveSpeed: number = 1;
-
-    protected _angles = new ObservablePoint(() => {
+    _angles = new ObservablePoint(() => {
         this._angles.x = Math.min(Math.max(-85, this._angles.x), 85)
     }, undefined, 0, 180)
 
-    constructor(app: Application, camera: Camera, inputsController: Inputs, map: Map) {
+    constructor(game: Game, camera: Camera) {
         this.camera = camera;
-        this.inputsController = inputsController;
-        this.app = app
-        this.map = map
-
-        this.camera.position.set(-10, 0, -10)
-        this.init()
+        this.game = game;
     }
 
     torch: Light;
     visionSphere: Mesh3D;
 
-    private init() {
+    public initialize() {
+        this.camera.position.set((2 - this.game.map.walls[0].length) * 2, 0, (2 - this.game.map.walls.length) * 2)
+
         this.torch = new Light()
         this.torch.intensity = 100
         this.torch.type = LightType.point
-        this.torch.color = new Color(1, 0.35, 0)
+        this.torch.color = new Color(0.9, 0.5, 0.2)
         this.torch.rotationQuaternion.setEulerAngles(25, 120, 0)
         LightingEnvironment.main.lights.push(this.torch)
 
-        this.visionSphere = this.app.stage.addChild(Mesh3D.createSphere())
+        this.visionSphere = this.game.app.stage.addChild(Mesh3D.createSphere())
         this.visionSphere.scale.set(15, 15, 15)
         let mat = this.visionSphere.material as StandardMaterial
         mat.doubleSided = true
@@ -55,10 +47,10 @@ export class Player {
 
         let nextX = this.camera.position.x + x * (moveSpeed + 4 * power)
         let nextZ = this.camera.position.z + z * (moveSpeed + 4 * power)
-        let j = Math.round((nextX + 2 * this.map.walls[0].length) / 2)
-        let i = Math.round((nextZ + 2 * this.map.walls.length) / 2)
+        let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
+        let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        if (this.map.walls[i][j] === 0) {
+        if (this.game.map.walls[i][j] === 0) {
             this.camera.position.x += x * moveSpeed
             this.camera.position.z += z * moveSpeed
         } else {
@@ -78,10 +70,10 @@ export class Player {
 
         let nextX = this.camera.position.x + z * (moveSpeed + 4 * power)
         let nextZ = this.camera.position.z - x * (moveSpeed + 4 * power)
-        let j = Math.round((nextX + 2 * this.map.walls[0].length) / 2)
-        let i = Math.round((nextZ + 2 * this.map.walls.length) / 2)
+        let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
+        let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        if (this.map.walls[i][j] === 0) {
+        if (this.game.map.walls[i][j] === 0) {
             this.camera.position.x += z * moveSpeed
             this.camera.position.z -= x * moveSpeed
         } else {
@@ -92,25 +84,36 @@ export class Player {
     }
 
     public update() {
-        if (this.inputsController.isDown(this.inputsController.W) || this.inputsController.isDown(this.inputsController.Z)) {
+        if (this.game.inputsController.isDown(this.game.inputsController.W) || this.game.inputsController.isDown(this.game.inputsController.Z)) {
             this.goForward(0.1);
+        } else if (Inputs.verticalPower > 0) {
+            this.goForward(0.1 * Inputs.verticalPower);
         }
-        if (this.inputsController.isDown(this.inputsController.S)) {
+
+        if (this.game.inputsController.isDown(this.game.inputsController.S)) {
             this.goForward(-0.1);
+        } else if (Inputs.verticalPower < 0) {
+            this.goForward(0.1 * Inputs.verticalPower);
         }
-        if (this.inputsController.isDown(this.inputsController.A) || this.inputsController.isDown(this.inputsController.Q)) {
+
+        if (this.game.inputsController.isDown(this.game.inputsController.A) || this.game.inputsController.isDown(this.game.inputsController.Q)) {
             this.goLeft(0.1);
+        } else if (Inputs.horizontalPower > 0) {
+            this.goLeft(- 0.1 * Inputs.horizontalPower);
         }
-        if (this.inputsController.isDown(this.inputsController.D)) {
+
+        if (this.game.inputsController.isDown(this.game.inputsController.D)) {
             this.goLeft(-0.1);
+        } else if (Inputs.horizontalPower < 0) {
+            this.goLeft(- 0.1 * Inputs.horizontalPower);
         }
 
         // Temporary, space goes up
-        if (this.inputsController.isDown(32)) {
+        if (this.game.inputsController.isDown(32)) {
             this.camera.position.y += 0.1;
         }
         // Temporary, shift goes down
-        if (this.inputsController.isDown(16)) {
+        if (this.game.inputsController.isDown(16)) {
             this.camera.position.y -= 0.1;
         }
 
@@ -118,10 +121,10 @@ export class Player {
         this.visionSphere.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z)
 
         // Hide walls far away
-        for (let i = 0; i < this.map.objects.length; i++) {
-            for (let j = 0; j < this.map.objects[i].length; j++) {
-                for (let k = 0; k < this.map.objects[i][j].length; k++) {
-                    let obj = this.map.objects[i][j][k]
+        for (let i = 0; i < this.game.map.objects.length; i++) {
+            for (let j = 0; j < this.game.map.objects[i].length; j++) {
+                for (let k = 0; k < this.game.map.objects[i][j].length; k++) {
+                    let obj = this.game.map.objects[i][j][k]
                     let distance = Math.sqrt((this.camera.position.x - obj.position.x) ** 2 + (this.camera.position.z - obj.position.z) ** 2)
                     if (distance > 20) {
                         obj.visible = false
@@ -132,9 +135,9 @@ export class Player {
             }
         }
 
-        let j = Math.round((this.camera.x + 2 * this.map.walls[0].length) / 2)
-        let i = Math.round((this.camera.z + 2 * this.map.walls.length) / 2)
-        console.log(i, j)
+        let j = (this.camera.x + 2 * this.game.map.walls[0].length) / 2
+        let i = (this.camera.z + 2 * this.game.map.walls.length) / 2
+        this.mapPosition = { realX: i, realY: j, x: Math.round(i), y: Math.round(j) }
     }
 
     public handlePointerMove(event: PointerEvent) {
