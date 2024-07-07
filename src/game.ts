@@ -5,6 +5,7 @@ import { Map } from "./map"
 import { Resources } from "./resources"
 import { Inputs } from "./inputs"
 import { Camera } from "pixi3d/pixi7"
+import { Notification } from "./notification"
 
 export class Game {
     app: Application
@@ -19,7 +20,7 @@ export class Game {
 
         this.resources = new Resources();
         this.inputsController = new Inputs();
-        this.map = new Map(this, { grid: [] })
+        this.map = new Map(this, { grid: [], loots: [] })
         this.player = new Player(this, Camera.main);
 
         this.update = this.update.bind(this)
@@ -37,7 +38,15 @@ export class Game {
 
     public bindEvents() {
         let that = this
-        window.addEventListener('keyup', function (event) { that.inputsController.onKeyup(event); }, false);
+        window.addEventListener('keyup', function (event) {
+            that.inputsController.onKeyup(event);
+
+            // if it's J, 
+            if (event.keyCode === 74) {
+                // create new notification
+                new Notification(that, { message: "Welcome to the dungeon!", time: 5 })
+            }
+        }, false);
         window.addEventListener('keydown', function (event) { that.inputsController.onKeydown(event); }, false);
         // @ts-ignore
         this.app.view.addEventListener('click', () => that.app.view.requestPointerLock());

@@ -1,4 +1,4 @@
-import { Application, Circle, Container, Graphics, Rectangle, Sprite } from "pixi.js"
+import { Application, Circle, Container, Graphics, Rectangle, Sprite, Text } from "pixi.js"
 import { Resources } from "./resources"
 import { Joystick } from "../lib/joystick"
 import { Inputs } from "./inputs"
@@ -11,6 +11,7 @@ export class Hud {
     joystick: Joystick
     crosshair: Sprite
     minimap: Container
+    hud: Container
 
     constructor(game: Game) {
         this.game = game
@@ -30,10 +31,12 @@ export class Hud {
         });
 
         this.minimap = new Container()
+        this.hud = new Container()
 
         this.game.app.stage.addChild(this.minimap);
         this.game.app.stage.addChild(this.joystick);
         this.game.app.stage.addChild(this.crosshair);
+        this.game.app.stage.addChild(this.hud);
 
         this.onResize()
     }
@@ -122,5 +125,11 @@ export class Hud {
         this.minimap.addChild(mask)
         this.minimap.mask = mask
 
+        this.hud.removeChildren()
+
+        // Add a text below to show the coordinates
+        let coordText = new Text(`(${player.mapPosition.x}, ${player.mapPosition.y})`, { fill: 0xffffff })
+        coordText.position.set(20, 180)
+        this.hud.addChild(coordText)
     }
 }

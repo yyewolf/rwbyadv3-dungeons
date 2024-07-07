@@ -8,6 +8,7 @@ export class Player {
     camera: Camera;
     moveSpeed: number = 0.75;
     mapPosition: { x: number, y: number, realX: number, realY: number } = { x: 0, y: 0, realX: 0, realY: 0 }
+    response: any = {};
 
     _angles = new ObservablePoint(() => {
         this._angles.x = Math.min(Math.max(-85, this._angles.x), 85)
@@ -25,7 +26,8 @@ export class Player {
         this.camera.position.set((2 - this.game.map.walls[0].length) * 2, 0, (2 - this.game.map.walls.length) * 2)
 
         this.torch = new Light()
-        this.torch.intensity = 100
+        this.torch.intensity = 75
+        this.torch.range = 20
         this.torch.type = LightType.point
         this.torch.color = new Color(0.9, 0.5, 0.2)
         this.torch.rotationQuaternion.setEulerAngles(25, 120, 0)
@@ -138,6 +140,18 @@ export class Player {
         let j = (this.camera.x + 2 * this.game.map.walls[0].length) / 2
         let i = (this.camera.z + 2 * this.game.map.walls.length) / 2
         this.mapPosition = { realX: i, realY: j, x: Math.round(i), y: Math.round(j) }
+
+        // If in loot box, destroy loot and call pickedUp
+        for (let i = 0; i < this.game.map.loots.length; i++) {
+            let loot = this.game.map.loots[i]
+            let object = loot.object
+            let distance = Math.sqrt((this.camera.position.x - object.position.x) ** 2 + (this.camera.position.z - object.position.z) ** 2)
+            if (distance < 1) {
+                loot.pickedUp(this)
+                this.game.map.loots.splice(i, 1)
+                object.destroy()
+            }
+        }
     }
 
     public handlePointerMove(event: PointerEvent) {

@@ -66,6 +66,15 @@ const manifest = {
                 },
             ],
         },
+        {
+            name: "moneybag",
+            assets: [
+                {
+                    name: "model",
+                    srcs: "assets/moneybag/scene.gltf",
+                },
+            ],
+        },
     ]
 }
 await Assets.init({ manifest })
@@ -74,17 +83,20 @@ let wood = await Assets.loadBundle("wood")
 let stone = await Assets.loadBundle("stone")
 let crosshair = await Assets.loadBundle("crosshair")
 let joystick = await Assets.loadBundle("joystick")
+let moneybag = await Assets.loadBundle("moneybag")
 
 export class Resources {
     wood: any
     stone: any
     crosshair: any
     joystick: any
+    moneybag: any
 
     constructor() {
         this.wood = wood
         this.stone = stone
         this.crosshair = crosshair
         this.joystick = joystick
+        this.moneybag = moneybag
     }
 }

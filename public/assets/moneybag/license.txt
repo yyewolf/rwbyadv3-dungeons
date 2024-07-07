@@ -1,0 +1,11 @@
+Model Information:
+* title:	money bag
+* source:	https://sketchfab.com/3d-models/money-bag-3b5cabdc5af24bc4b799e53cc5e34873
+* author:	sv1nks (https://sketchfab.com/sv1nks)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "money bag" (https://sketchfab.com/3d-models/money-bag-3b5cabdc5af24bc4b799e53cc5e34873) by sv1nks (https://sketchfab.com/sv1nks) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

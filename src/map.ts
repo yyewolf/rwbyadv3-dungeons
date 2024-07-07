@@ -1,7 +1,6 @@
-import { Application } from "pixi.js"
-import { Mesh3D, StandardMaterial } from "pixi3d/pixi7"
-import { Resources } from "./resources"
+import { Mesh3D, Model, StandardMaterial } from "pixi3d/pixi7"
 import { Game } from "./game"
+import { Loot, MoneyBag } from "./loots"
 
 export class Map {
   game: Game
@@ -13,12 +12,21 @@ export class Map {
     [1, 0, 0, 0, 1],
     [1, 1, 1, 1, 1],
   ]
-  loots: any[] = []
+  loots: Loot[] = []
   objects: Mesh3D[][][] = []
 
   constructor(game: Game, data: any) {
     this.walls = data.grid
     this.game = game
+
+    this.loots = data.loots.map((loot: any) => {
+      switch (loot.type) {
+        case "money":
+          return new MoneyBag(loot)
+      }
+    })
+
+    this.generate = this.generate.bind(this)
 
     this.generate()
   }
@@ -69,6 +77,14 @@ export class Map {
           this.objects[i][j].push(ceiling)
         }
       }
+    }
+
+    // Add a money bags
+    for (let i = 0; i < this.loots.length; i++) {
+      let loot = this.loots[i]
+      let model = loot.model(this.game.resources)
+      let object = this.game.app.stage.addChild(model)
+      loot.place(object, (loot.x - this.walls.length) * 2, (loot.y - this.walls.length) * 2)
     }
   }
 }
