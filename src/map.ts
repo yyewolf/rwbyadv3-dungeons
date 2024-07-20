@@ -1,6 +1,6 @@
-import { Mesh3D, Model, StandardMaterial } from "pixi3d/pixi7"
+import { Mesh3D, StandardMaterial } from "pixi3d/pixi7"
 import { Game } from "./game"
-import { Loot, MoneyBag } from "./loots"
+import { Exit, Loot, MoneyBag } from "./loots"
 
 export class Map {
   game: Game
@@ -23,15 +23,15 @@ export class Map {
       switch (loot.type) {
         case "money":
           return new MoneyBag(loot)
+        case "exit":
+          return new Exit(loot)
       }
     })
 
     this.generate = this.generate.bind(this)
-
-    this.generate()
   }
 
-  private generate() {
+  generate() {
     for (let i = 0; i < this.walls.length; i++) {
       this.objects.push([])
       for (let j = 0; j < this.walls[i].length; j++) {
@@ -79,12 +79,15 @@ export class Map {
       }
     }
 
-    // Add a money bags
+    // Add loots
     for (let i = 0; i < this.loots.length; i++) {
       let loot = this.loots[i]
       let model = loot.model(this.game.resources)
       let object = this.game.app.stage.addChild(model)
       loot.place(object, (loot.x - this.walls.length) * 2, (loot.y - this.walls.length) * 2)
+      if (loot.animate) {
+        loot.animate(this.game.app)
+      }
     }
   }
 }

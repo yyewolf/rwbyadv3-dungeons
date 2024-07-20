@@ -8,7 +8,9 @@ export class Player {
     camera: Camera;
     moveSpeed: number = 0.75;
     mapPosition: { x: number, y: number, realX: number, realY: number } = { x: 0, y: 0, realX: 0, realY: 0 }
-    response: any = {};
+    response: any = {
+        loots: []
+    };
 
     _angles = new ObservablePoint(() => {
         this._angles.x = Math.min(Math.max(-85, this._angles.x), 85)
@@ -17,15 +19,17 @@ export class Player {
     constructor(game: Game, camera: Camera) {
         this.camera = camera;
         this.game = game;
+
+        this.endGame = this.endGame.bind(this);
     }
 
-    torch: Light;
-    visionSphere: Mesh3D;
+    torch: Light = new Light();
+    visionSphere: Mesh3D = Mesh3D.createSphere();
 
     public initialize() {
         this.camera.position.set((2 - this.game.map.walls[0].length) * 2, 0, (2 - this.game.map.walls.length) * 2)
 
-        this.torch = new Light()
+        this.torch
         this.torch.intensity = 75
         this.torch.range = 20
         this.torch.type = LightType.point
@@ -47,19 +51,15 @@ export class Player {
         let x = Math.sin(yaw * Math.PI / 180)
         let z = Math.cos(yaw * Math.PI / 180)
 
-        let nextX = this.camera.position.x + x * (moveSpeed + 4 * power)
-        let nextZ = this.camera.position.z + z * (moveSpeed + 4 * power)
+        let nextX = this.camera.position.x + x * (moveSpeed * 2 + 4 * power)
+        let nextZ = this.camera.position.z + z * (moveSpeed * 2 + 4 * power)
         let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
         let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        if (this.game.map.walls[i][j] === 0) {
-            this.camera.position.x += x * moveSpeed
-            this.camera.position.z += z * moveSpeed
-        } else {
-            // go back a bit
-            this.camera.position.x -= x * moveSpeed
-            this.camera.position.z -= z * moveSpeed
-        }
+        // if (this.game.map.walls[i][j] === 0) {
+        this.camera.position.x += x * moveSpeed
+        this.camera.position.z += z * moveSpeed
+        // }
     }
 
     private goLeft(power: number) {
@@ -70,19 +70,15 @@ export class Player {
         let x = Math.sin(yaw * Math.PI / 180)
         let z = Math.cos(yaw * Math.PI / 180)
 
-        let nextX = this.camera.position.x + z * (moveSpeed + 4 * power)
-        let nextZ = this.camera.position.z - x * (moveSpeed + 4 * power)
+        let nextX = this.camera.position.x + z * (moveSpeed * 2 + 4 * power)
+        let nextZ = this.camera.position.z - x * (moveSpeed * 2 + 4 * power)
         let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
         let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        if (this.game.map.walls[i][j] === 0) {
-            this.camera.position.x += z * moveSpeed
-            this.camera.position.z -= x * moveSpeed
-        } else {
-            // go back a bit
-            this.camera.position.x -= z * moveSpeed
-            this.camera.position.z += x * moveSpeed
-        }
+        // if (this.game.map.walls[i][j] === 0) {
+        this.camera.position.x += z * moveSpeed
+        this.camera.position.z -= x * moveSpeed
+        // }
     }
 
     public update() {
@@ -119,53 +115,64 @@ export class Player {
             this.camera.position.y -= 0.1;
         }
 
-        this.torch.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z)
-        this.visionSphere.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z)
+        this.torch.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
+        this.visionSphere.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
 
         // Hide walls far away
         for (let i = 0; i < this.game.map.objects.length; i++) {
             for (let j = 0; j < this.game.map.objects[i].length; j++) {
                 for (let k = 0; k < this.game.map.objects[i][j].length; k++) {
-                    let obj = this.game.map.objects[i][j][k]
-                    let distance = Math.sqrt((this.camera.position.x - obj.position.x) ** 2 + (this.camera.position.z - obj.position.z) ** 2)
+                    let obj = this.game.map.objects[i][j][k];
+                    let distance = Math.sqrt((this.camera.position.x - obj.position.x) ** 2 + (this.camera.position.z - obj.position.z) ** 2);
                     if (distance > 20) {
-                        obj.visible = false
+                        obj.visible = false;
                     } else {
-                        obj.visible = true
+                        obj.visible = true;
                     }
                 }
             }
         }
 
-        let j = (this.camera.x + 2 * this.game.map.walls[0].length) / 2
-        let i = (this.camera.z + 2 * this.game.map.walls.length) / 2
-        this.mapPosition = { realX: i, realY: j, x: Math.round(i), y: Math.round(j) }
+        let j = (this.camera.x + 2 * this.game.map.walls[0].length) / 2;
+        let i = (this.camera.z + 2 * this.game.map.walls.length) / 2;
+        this.mapPosition = { realX: i, realY: j, x: Math.round(i), y: Math.round(j) };
 
         // If in loot box, destroy loot and call pickedUp
         for (let i = 0; i < this.game.map.loots.length; i++) {
-            let loot = this.game.map.loots[i]
-            let object = loot.object
-            let distance = Math.sqrt((this.camera.position.x - object.position.x) ** 2 + (this.camera.position.z - object.position.z) ** 2)
+            let loot = this.game.map.loots[i];
+            let object = loot.object;
+            let distance = Math.sqrt((this.camera.position.x - object.position.x) ** 2 + (this.camera.position.z - object.position.z) ** 2);
             if (distance < 1) {
-                loot.pickedUp(this)
-                this.game.map.loots.splice(i, 1)
-                object.destroy()
+                loot.pickedUp(this);
+                this.response.loots.push(loot.id);
+                this.game.map.loots.splice(i, 1);
+                object.destroy();
             }
         }
+
+        // Debugging purposes
+        // console.log(this.camera.z, this.camera.x);
     }
 
     public handlePointerMove(event: PointerEvent) {
-        this._angles.x += event.movementY * 0.5
-        this._angles.y -= event.movementX * 0.5
-        this.updateCamera()
+        this._angles.x += event.movementY * 0.5;
+        this._angles.y -= event.movementX * 0.5;
+        this.updateCamera();
     }
 
 
     public updateCamera(): void {
-        const angles = this._angles
+        const angles = this._angles;
 
-        const rot = Quat.fromEuler(angles.x, angles.y, 0, new Float32Array(4))
+        const rot = Quat.fromEuler(angles.x, angles.y, 0, new Float32Array(4));
 
-        this.camera.rotationQuaternion.set(rot[0], rot[1], rot[2], rot[3])
+        this.camera.rotationQuaternion.set(rot[0], rot[1], rot[2], rot[3]);
+    }
+
+    public endGame() {
+        this.update = () => { };
+        this.handlePointerMove = () => { };
+        this.updateCamera = () => { };
+        this.game.endGame();
     }
 }

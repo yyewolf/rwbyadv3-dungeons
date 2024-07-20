@@ -39,6 +39,8 @@ export class Hud {
         this.game.app.stage.addChild(this.hud);
 
         this.onResize()
+        this.update = this.update.bind(this)
+        this.endGame = this.endGame.bind(this)
     }
 
     onPointerDown(event: PointerEvent) {
@@ -131,5 +133,28 @@ export class Hud {
         let coordText = new Text(`(${player.mapPosition.x}, ${player.mapPosition.y})`, { fill: 0xffffff })
         coordText.position.set(20, 180)
         this.hud.addChild(coordText)
+    }
+
+    public endGame() {
+        this.update = () => { }
+
+        this.joystick.destroy()
+        this.crosshair.destroy()
+        this.minimap.destroy()
+        for (let child of this.hud.children) {
+            child.destroy()
+        }
+
+        // add gray background
+        let background = new Graphics()
+        background.beginFill(0x000000, 0.5)
+        background.drawRect(0, 0, this.game.app.screen.width, this.game.app.screen.height)
+        background.endFill()
+        this.hud.addChild(background)
+
+        let text = new Text("You finished the dungeon!", { fill: 0xffffff, fontSize: 50 })
+        text.anchor.set(0.5)
+        text.position.set(this.game.app.screen.width / 2, this.game.app.screen.height / 2)
+        this.hud.addChild(text)
     }
 }

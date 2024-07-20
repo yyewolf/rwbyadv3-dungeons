@@ -6,6 +6,7 @@ import { Resources } from "./resources"
 import { Inputs } from "./inputs"
 import { Camera } from "pixi3d/pixi7"
 import { Notification } from "./notification"
+import { Loading } from "./loading"
 
 export class Game {
     app: Application
@@ -24,16 +25,26 @@ export class Game {
         this.player = new Player(this, Camera.main);
 
         this.update = this.update.bind(this)
+        this.endGame = this.endGame.bind(this)
     }
 
     async initialize() {
-        let data = await fetch("map").then(res => res.json());
+        let progressBar = new Loading(this)
+        this.app.stage.addChild(progressBar);
+        this.resources.onProgress = progressBar.setProgress
+        await this.resources.initialize()
+
+        // @ts-ignore
+        let data = await fetch("/dungeons/api/dungeon/" + dungeonId).then(res => res.json());
         this.map = new Map(this, data);
+        this.map.generate()
 
         this.player = new Player(this, Camera.main);
         this.player.initialize();
 
         this.hud = new Hud(this);
+
+        this.app.stage.removeChild(progressBar)
     }
 
     public bindEvents() {
@@ -45,6 +56,11 @@ export class Game {
             if (event.keyCode === 74) {
                 // create new notification
                 new Notification(that, { message: "Welcome to the dungeon!", time: 5 })
+            }
+            // if it's K,
+            if (event.keyCode === 75) {
+                // create new notification
+                that.endGame()
             }
         }, false);
         window.addEventListener('keydown', function (event) { that.inputsController.onKeydown(event); }, false);
@@ -67,5 +83,26 @@ export class Game {
         this.player.update();
         this.hud?.update();
         requestAnimationFrame(this.update);
+    }
+
+    public endGame() {
+        this.endGame = () => { }
+        this.player.endGame();
+        this.hud?.endGame();
+
+        // free the pointer
+        document.exitPointerLock();
+
+        // send end request
+        // @ts-ignore
+        fetch("/dungeons/api/dungeon/" + dungeonId + "/end", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.player.response)
+        }).then(res => res.json()).then(data => {
+            console.log(data);
+        });
     }
 }
