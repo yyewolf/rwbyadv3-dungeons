@@ -84,6 +84,7 @@ export class Exit implements Loot {
 
     pickedUp(player: Player) {
         this.available = false
+        player.response.loots.push(this.id)
         player.endGame()
     }
 
