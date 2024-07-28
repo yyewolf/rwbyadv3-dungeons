@@ -7,19 +7,19 @@ const manifest = {
             assets: [
                 {
                     name: "baseColor",
-                    srcs: "assets/wood/worn_planks_diff_1k.jpg",
+                    srcs: "/dungeons/static/assets/wood/worn_planks_diff_1k.jpg",
                 },
                 {
                     name: "normal",
-                    srcs: "assets/wood/worn_planks_nor_gl_1k.jpg",
+                    srcs: "/dungeons/static/assets/wood/worn_planks_nor_gl_1k.jpg",
                 },
                 {
                     name: "roughness",
-                    srcs: "assets/wood/worn_planks_rough_1k.jpg",
+                    srcs: "/dungeons/static/assets/wood/worn_planks_rough_1k.jpg",
                 },
                 {
                     name: "emissive",
-                    srcs: "assets/wood/worn_planks_disp_1k.jpg",
+                    srcs: "/dungeons/static/assets/wood/worn_planks_disp_1k.jpg",
                 },
             ],
         },
@@ -28,19 +28,19 @@ const manifest = {
             assets: [
                 {
                     name: "baseColor",
-                    srcs: "assets/stone/Stone_Floor_002_COLOR.jpg",
+                    srcs: "/dungeons/static/assets/stone/Stone_Floor_002_COLOR.jpg",
                 },
                 {
                     name: "normal",
-                    srcs: "assets/stone/Stone_Floor_002_NORM.jpg",
+                    srcs: "/dungeons/static/assets/stone/Stone_Floor_002_NORM.jpg",
                 },
                 {
                     name: "occlusion",
-                    srcs: "assets/stone/Stone_Floor_002_OCC.jpg",
+                    srcs: "/dungeons/static/assets/stone/Stone_Floor_002_OCC.jpg",
                 },
                 {
                     name: "emissive",
-                    srcs: "assets/stone/Stone_Floor_002_DISP.png",
+                    srcs: "/dungeons/static/assets/stone/Stone_Floor_002_DISP.png",
                 },
             ],
         },
@@ -49,7 +49,7 @@ const manifest = {
             assets: [
                 {
                     name: "base",
-                    srcs: "assets/crosshair.png",
+                    srcs: "/dungeons/static/assets/crosshair.png",
                 },
             ],
         },
@@ -58,11 +58,11 @@ const manifest = {
             assets: [
                 {
                     name: "base",
-                    srcs: "assets/joystick/joystick.png",
+                    srcs: "/dungeons/static/assets/joystick/joystick.png",
                 },
                 {
                     name: "handle",
-                    srcs: "assets/joystick/joystick-handle.png",
+                    srcs: "/dungeons/static/assets/joystick/joystick-handle.png",
                 },
             ],
         },
@@ -71,7 +71,7 @@ const manifest = {
             assets: [
                 {
                     name: "model",
-                    srcs: "assets/moneybag/scene.gltf",
+                    srcs: "/dungeons/static/assets/moneybag/scene.gltf",
                     format: 'gltf',
                 },
             ],
@@ -81,7 +81,7 @@ const manifest = {
             assets: [
                 {
                     name: "portal",
-                    srcs: "assets/portal/portal.png",
+                    srcs: "/dungeons/static/assets/portal/portal.png",
                 },
             ],
         },
