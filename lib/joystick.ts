@@ -241,7 +241,7 @@ export class Joystick extends Container {
 
         window.addEventListener('pointermove', (e) => {
             if (this.pointerId !== e.pointerId) { return; }
-            onDragMove(e as FederatedPointerEvent);
+            onDragMove((e as unknown) as FederatedPointerEvent);
         });
     }
 
