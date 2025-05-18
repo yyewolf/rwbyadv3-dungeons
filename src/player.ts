@@ -56,10 +56,10 @@ export class Player {
         let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
         let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        // if (this.game.map.walls[i][j] === 0) {
-        this.camera.position.x += x * moveSpeed
-        this.camera.position.z += z * moveSpeed
-        // }
+        if (this.game.map.walls[i][j] === 0) {
+            this.camera.position.x += x * moveSpeed
+            this.camera.position.z += z * moveSpeed
+        }
     }
 
     private goLeft(power: number) {
@@ -75,10 +75,10 @@ export class Player {
         let j = Math.round((nextX + 2 * this.game.map.walls[0].length) / 2)
         let i = Math.round((nextZ + 2 * this.game.map.walls.length) / 2)
 
-        // if (this.game.map.walls[i][j] === 0) {
-        this.camera.position.x += z * moveSpeed
-        this.camera.position.z -= x * moveSpeed
-        // }
+        if (this.game.map.walls[i][j] === 0) {
+            this.camera.position.x += z * moveSpeed
+            this.camera.position.z -= x * moveSpeed
+        }
     }
 
     public update() {
@@ -106,14 +106,14 @@ export class Player {
             this.goLeft(- 0.1 * Inputs.horizontalPower);
         }
 
-        // Temporary, space goes up
-        if (this.game.inputsController.isDown(32)) {
-            this.camera.position.y += 0.1;
-        }
-        // Temporary, shift goes down
-        if (this.game.inputsController.isDown(16)) {
-            this.camera.position.y -= 0.1;
-        }
+        // // Temporary, space goes up
+        // if (this.game.inputsController.isDown(32)) {
+        //     this.camera.position.y += 0.1;
+        // }
+        // // Temporary, shift goes down
+        // if (this.game.inputsController.isDown(16)) {
+        //     this.camera.position.y -= 0.1;
+        // }
 
         this.torch.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
         this.visionSphere.position.set(this.camera.position.x, this.camera.position.y, this.camera.position.z);
